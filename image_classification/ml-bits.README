@@ -1,0 +1,172 @@
+* what is softmax regression? (https://www.quora.com/What-is-softmax-regression)
+- As Jay Verkuilen mentioned in his answer, Softmax regression is just another name for Multinomial Linear Regression or simply Multi-class Logistic Regression.
+
+In its essence, softmax regression is a generalization of logistic regression that we can use for multi-class classification (under the assumption that the classes are mutually exclusive). In contrast, we use the (standard) Logistic Regression model in binary classification tasks.
+
+Here's a link to to a related question Sebastian Raschka's answer to What is the intuition behind SoftMax function?  where I go a bit more into the math since I am not sure about the scope of your question (definition or concept); hopefully it helps! :)
+
+* what is ensemble learning? (https://www.quora.com/How-does-the-dropout-method-work-in-deep-learning)
+ In ensemble learning we take a number of ‘weaker’ classifiers, train them separately and then at test time we use them by averaging the responses of all ensemble members. Since each classifier has been trained separately, it has learned different ‘aspects’ of the data and their mistakes are different. Combining them helps to produce an stronger classifier, which is less prone to overfitting. Random Forests or GBTs are typical ensemble classifiers.
+
+* what is dropout and why should i care? (https://www.quora.com/How-does-the-dropout-method-work-in-deep-learning)
+
+ -  dropout is a form of regularization (it constrains network adaptation to the data at training time, to avoid it becoming “too smart” in learning the input data; it thus helps to avoid overfitting).
+
+ - One ensemble variant is bagging, in which each member of the ensemble is trained with a different subsample of the input data, and thus has learned only a subset of the whole possible input feature space.
+
+Dropout, then, can be seen as an extreme version of bagging. At each training step in a mini-batch, the dropout procedure creates a different network (by randomly removing some units), which is trained using backpropagation as usual. Conceptually, then, the whole procedure is akin to using an ensemble of many different networks (one per step) each trained with a single sample (i.e. extreme bagging).
+
+- Dropout is a form of regularisation.
+
+How does it work?
+It essentially forces an artificial neural network to learn multiple independent representations of the same data by alternately randomly disabling neurons in the learning phase.
+
+What is the effect of this?
+The effect of this is that neurons are prevented from co-adapting too much which makes overfitting less likely.
+
+Why does this happen?
+The reason that this works is comparable to why using the mean outputs of many separately trained neural networks to reduces overfitting.
+
+* How do you deal with overfitting in Neural Nets? (https://www.coursera.org/learn/neural-networks/lecture/0yY9z/using-the-derivatives-computed-by-backpropagation-10-min)
+
+- There's weight-decay, where you try and keep the weights of the networks small. We'll try and keep many of the weights at 0. And the idea of this is that it will make the model simpler. 
+- There's weight sharing where again, you make the model simpler by insisting that many of the weights have exactly the same value as each other. You don't know what the value is and you're going to learn it but it has to be exactly the same for many of the weights.
+- There's early stopping, where you make yourself a fake test set. And as you're training the net, you peak at what's happening on this fake test set. And once the performance on the fake test set starts getting worse, you stop training. 
+- There's model averaging, where you train lots of different neural nets. And you average them together in the hopes that that will reduce the errors you're making. 
+- There's Bayesian fitting of neural nets, which is really just a fancy form of model averaging. 
+- There's dropout, where you try and make your model more robust by randomly emitting hidden units when you're training it. 
+- And there's generative pre-training. 
+
+
+Udacity DL course scratch-pad:
+==============================
+cd \Users\deezy\trunk\fast-style-transfer
+activate source-transfer_2
+python evaluate.py --checkpoint ./rain-princess.ckpt --in-path ./deezy-alaska-rsz.jpg --out-path ./alaska-rain.jpg
+python evaluate.py --checkpoint ./la-muse.ckpt --in-path ./deezy-alaska-rsz.jpg --out-path ./alaska-la-muse.jpg
+python evaluate.py --checkpoint ./udnie.ckpt --in-path ./deezy-alaska-rsz.jpg --out-path ./alaska-udnie.jpg
+python evaluate.py --checkpoint ./scream.ckpt --in-path ./deezy-alaska-rsz.jpg --out-path ./alaska-scream.jpg
+python evaluate.py --checkpoint ./wave.ckpt --in-path ./deezy-alaska-rsz.jpg --out-path ./alaska-wave.jpg
+python evaluate.py --checkpoint ./wreck.ckpt --in-path ./deezy-alaska-rsz.jpg --out-path ./alaska-wreck.jpg
+
+
+# sentiment network
+cd \Users\deezy\trunk\first-nn\sentiment-network
+conda create -n udacity_dl -c bioninja python=3.5 numpy jupyter notebook matplotlib scikit-learn bokeh
+
+shape = (3,3,2,1)
+tensors = [
+			[	
+				[
+					[1],
+					[2]
+				], # 2x1
+				[
+					[3],
+					[4]
+				], # 2x1
+				[
+					[5],
+					[6]
+				]  # 2x1
+			], # 3x2x1
+			[
+				[
+					[7],
+					[8]
+				],
+    			[
+    				[9],
+    				[10]
+    			],
+    			[
+    				[11],
+    				[12]
+    			]
+    		], # 3x2x1
+    		[
+    			[
+    				[13],
+    				[14]
+    			],
+    			[
+    				[15],
+    				[16]
+    			],
+    			[	
+    				[17],
+    				[17]
+    			]
+    		] # 3x2x1
+    	] (3x(3x(2x(1))))
+
+Tensorflow:
+	- Strides (https://stackoverflow.com/questions/34642595/tensorflow-strides-argument)
+		- My questions are:
+
+		*What do each of the 4+ integers represent?
+		*Why must they have strides[0] = strides[3] = 1 for convnets?
+		*In this example we see tf.reshape(_X,shape=[-1, 28, 28, 1]). Why -1?
+
+		The pooling and convolutional ops slide a "window" across the input tensor. 
+		Using tf.nn.conv2d as an example: If the input tensor has 4 dimensions:  [batch, height, width, channels], then the convolution operates on a 2D window on the height, width dimensions.
+
+		strides determines how much the window shifts by in each of the dimensions. The typical use sets the first (the batch) and last (the depth) stride to 1.
+
+		Let's use a very concrete example: Running a 2-d convolution over a 32x32 greyscale input image. I say greyscale because then the input image has depth=1, which helps keep it simple. Let that image look like this:
+
+		00 01 02 03 04 ...
+		10 11 12 13 14 ...
+		20 21 22 23 24 ...
+		30 31 32 33 34 ...
+		...
+		Let's run a 2x2 convolution window over a single example (batch size = 1). We'll give the convolution an output channel depth of 8.
+
+		The input to the convolution has shape=[1, 32, 32, 1].
+
+		If you specify strides=[1,1,1,1] with padding=SAME, then the output of the filter will be [1, 32, 32, 8].
+
+		The filter will first create an output for:
+
+		F(00 01
+		  10 11)
+		And then for:
+
+		F(01 02
+		  11 12)
+		and so on. Then it will move to the second row, calculating:
+
+		F(10, 11
+		  20, 21)
+		then
+
+		F(11, 12
+		  21, 22)
+		If you specify a stride of [1, 2, 2, 1] it won't do overlapping windows. It will compute:
+
+		F(00, 01
+		  10, 11)
+		and then
+
+		F(02, 03
+		  12, 13)
+		The stride operates similarly for the pooling operators.
+
+		* Question 2: Why strides [1, x, y, 1] for convnets
+
+		The first 1 is the batch: You don't usually want to skip over examples in your batch, or you shouldn't have included them in the first place. :)
+
+		The last 1 is the depth of the convolution: You don't usually want to skip inputs, for the same reason.
+
+		The conv2d operator is more general, so you could create convolutions that slide the window along other dimensions, but that's not a typical use in convnets. The typical use is to use them spatially.
+
+		* Why reshape to -1?
+		-1 is a placeholder that says "adjust as necessary to match the size needed for the full tensor." It's a way of making the code be independent of the input batch size, so that you can change your pipeline and not have to adjust the batch size everywhere in the code.
+
+* What is the benefit of the truncated normal distribution in initializing weights in a neural network?
+	- The benefit of using the truncated normal distribution is to prevent generating "dead neurons" due to the relu_logits being used, which is explained here - One should generally initialize weights with a small amount of noise for symmetry breaking, and to prevent 0 gradients. Since we're using ReLU neurons, it is also good practice to initialize them with a slightly positive initial bias to avoid "dead neurons".
+
+	- tf.truncated_normal selects random numbers from a normal distribution whose mean is close to 0 and values are close to 0 Ex. -0.1 to 0.1. It's called truncated because your cutting off the tails from a normal distribution.
+	  tf.random_normal selects random numbers from a normal distribution whose mean is close to 0; however the values can be a bit further apart. Ex. -2 to 2
+	  In practice (Machine Learning) you usually want your weights to be close to 0.
+
