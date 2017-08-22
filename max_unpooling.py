@@ -4,46 +4,42 @@
 # Limitations:
 # 1. //, argmax run ONLY on GPUs.
 
-class FabianbormannMaxUnpooling(object):
+def unravel_argmax(argmax, shape):
+    output_list = []
+    output_list.append(argmax // (shape[2] * shape[3]))
+    output_list.append(argmax % (shape[2] * shape[3]) // shape[3])
+    return tf.stack(output_list)
+
+def unpool_layer2x2(x, raveled_argmax, out_shape):
+    argmax = unravel_argmax(raveled_argmax, tf.to_int64(out_shape))
+
+    output = tf.zeros([out_shape[1], out_shape[2], out_shape[3]])
+
+    height = tf.shape(output)[0]
+    width = tf.shape(output)[1]
+    channels = tf.shape(output)[2]
+
+    t1 = tf.to_int64(tf.range(channels))
+    t1 = tf.tile(t1, [((width + 1) // 2) * ((height + 1) // 2)])
+    t1 = tf.reshape(t1, [-1, channels])
+    t1 = tf.transpose(t1, perm=[1, 0])
+    t1 = tf.reshape(t1, [channels, (height + 1) // 2, (width + 1) // 2, 1])
+
+    t2 = tf.squeeze(argmax)
+    t2 = tf.stack((t2[0], t2[1]), axis=0)
+    t2 = tf.transpose(t2, perm=[3, 1, 2, 0])
+
+    t = tf.concat([t2, t1], 3)
+    indices = tf.reshape(t, [((height + 1) // 2) * ((width + 1) // 2) * channels, 3])
+
+    x1 = tf.squeeze(x)
+    x1 = tf.reshape(x1, [-1, channels])
+    x1 = tf.transpose(x1, perm=[1, 0])
+    values = tf.reshape(x1, [-1])
+
+    delta = tf.SparseTensor(indices, values, tf.to_int64(tf.shape(output)))
+    return tf.expand_dims(tf.sparse_tensor_to_dense(tf.sparse_reorder(delta)), 0)
   
-  @classmethod
-  def unravel_argmax(argmax, shape):
-      output_list = []
-      output_list.append(argmax // (shape[2] * shape[3]))
-      output_list.append(argmax % (shape[2] * shape[3]) // shape[3])
-      return tf.stack(output_list)
-  
-  @classmethod
-  def unpool_layer2x2(x, raveled_argmax, out_shape):
-      argmax = unravel_argmax(raveled_argmax, tf.to_int64(out_shape))
-
-      output = tf.zeros([out_shape[1], out_shape[2], out_shape[3]])
-
-      height = tf.shape(output)[0]
-      width = tf.shape(output)[1]
-      channels = tf.shape(output)[2]
-
-      t1 = tf.to_int64(tf.range(channels))
-      t1 = tf.tile(t1, [((width + 1) // 2) * ((height + 1) // 2)])
-      t1 = tf.reshape(t1, [-1, channels])
-      t1 = tf.transpose(t1, perm=[1, 0])
-      t1 = tf.reshape(t1, [channels, (height + 1) // 2, (width + 1) // 2, 1])
-
-      t2 = tf.squeeze(argmax)
-      t2 = tf.stack((t2[0], t2[1]), axis=0)
-      t2 = tf.transpose(t2, perm=[3, 1, 2, 0])
-
-      t = tf.concat([t2, t1], 3)
-      indices = tf.reshape(t, [((height + 1) // 2) * ((width + 1) // 2) * channels, 3])
-
-      x1 = tf.squeeze(x)
-      x1 = tf.reshape(x1, [-1, channels])
-      x1 = tf.transpose(x1, perm=[1, 0])
-      values = tf.reshape(x1, [-1])
-
-      delta = tf.SparseTensor(indices, values, tf.to_int64(tf.shape(output)))
-      return tf.expand_dims(tf.sparse_tensor_to_dense(tf.sparse_reorder(delta)), 0)
-
 # test max unpooling solution from fabianbormann
 x = tf.placeholder(tf.float32, shape=(1, None, None, None))
 
