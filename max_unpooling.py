@@ -57,15 +57,15 @@ pool_4, argmax_4 = tf.nn.max_pool_with_argmax(pool_3, ksize=[1, 2, 2, 1], stride
 
 pool_5, argmax_5 = tf.nn.max_pool_with_argmax(pool_4, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name='pool1')
 
-unpool_5 = unpool_layer2x2(pool_5, argmax_5, tf.shape(pool_4))
+unpool_5 = FabianbormannMaxUnpooling.unpool_layer2x2(pool_5, argmax_5, tf.shape(pool_4))
 
-unpool_4 = unpool_layer2x2(unpool_5, argmax_4, tf.shape(pool_3))
+unpool_4 = FabianbormannMaxUnpooling.unpool_layer2x2(unpool_5, argmax_4, tf.shape(pool_3))
 
-unpool_3 = unpool_layer2x2(unpool_4, argmax_3, tf.shape(pool_2))
+unpool_3 = FabianbormannMaxUnpooling.unpool_layer2x2(unpool_4, argmax_3, tf.shape(pool_2))
 
-unpool_2 = unpool_layer2x2(unpool_3, argmax_2, tf.shape(pool_1))
+unpool_2 = FabianbormannMaxUnpooling.unpool_layer2x2(unpool_3, argmax_2, tf.shape(pool_1))
 
-unpool_1 = unpool_layer2x2(unpool_2, argmax_1, tf.shape(x))
+unpool_1 = FabianbormannMaxUnpooling.unpool_layer2x2(unpool_2, argmax_1, tf.shape(x))
 
 session = tf.InteractiveSession()
 session.run(tf.global_variables_initializer())
